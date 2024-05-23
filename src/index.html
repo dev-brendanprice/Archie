@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="./style.css">
+    <link rel="icon" type="image/x-icon" href="./media/favicon.ico">
+    <title>Archie</title>
+</head>
+<body>
+
+    <div id="bg"></div>
+
+    <div>
+        <div id="head">
+            <img src="./media/archie.png" id="ico" onclick="window.location.reload();">
+            <div onclick="window.location.reload();">Archie</div>
+            <a href="https://www.bungie.net/7/en/News" target="_blank" id="bnews">Bungie News</a>
+        </div>
+
+        <div id="mid">
+            <div id="sbtitle">Search for Weapon Changes via Patch Notes</div>
+            <input type="text" id="sbar" placeholder="Sunshot">
+            <div id="results"></div>
+        </div>
+
+        <div id="singlerescon">
+            <div id="titleresult"></div>
+            <div id="singleresult"></div>
+        </div>
+    </div>
+
+    <script type="module" src="script.js"></script>
+</body>
+</html>
