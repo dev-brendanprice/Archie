@@ -78,11 +78,6 @@ a:visited { color: #8c85b6; }
     cursor: pointer;
 }
 
-#titleresult {
-    font-size: 20px;
-    margin-bottom: 20px;
-}
-
 #singlerescon {
     display: none;
     font-size: 12px;
@@ -90,19 +85,50 @@ a:visited { color: #8c85b6; }
     margin-top: 30px;
     margin-left: 30px;
     padding-right: 40px;
+    padding-bottom: 50px;
     text-align: left;
 }
 
+#titleresult {
+    font-size: 26px;
+    margin-bottom: 20px;
+}
+
 #readerControlsContainer {
-    display: none; /* flex */
-    gap: 5px;
+    display: none;
+    position: sticky;
+    margin-top: 30px;
+    margin-left: 30px;
+    top: 10px;
     align-items: center;
     text-align: left;
 }
 
-#readerControlPrevious, #readerControlNext {
+#readerControlsReferenceCon {
+    display: flex;
+    margin-top: 5px;
+    padding: 3px;
+    padding-left: 5px;
+    padding-right: 5px;
+    gap: 10px;
+    width: fit-content;
     font-size: 12px;
+    background-color: #211D3D;
+    border: 1px solid #6D698D;
+    border-radius: 4px;
+    box-shadow: 0px 0px 20px #090811;
+    font-weight: normal;
+    user-select: none;
+}
+
+#readerControlReferenceTag {
+    margin-right: 10px;
+    font-style: italic;
+}
+
+#readerControlPrevious:hover, #readerControlNext:hover {
     cursor: pointer;
+    color: white;
 }
 
 #readerControlSbar {
@@ -117,5 +143,6 @@ a:visited { color: #8c85b6; }
     font-size: 12px;
     font-weight: normal;
     color: #686484;
-    width: 20%;
+    width: 35%;
+    box-shadow: 0px 0px 20px #090811;
 }

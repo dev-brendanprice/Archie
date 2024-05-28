@@ -1,5 +1,6 @@
 import {get, set} from 'idb-keyval';
 import formatString from './helpers/formatString';
+import ScrollTo from './helpers/scrollTo';
 
 window.scrollTo(0, 0); // Lazy load-scroll fix
 let locale = navigator.language.split('-')[0];
@@ -164,6 +165,7 @@ function readAttr(div, data) {
     document.getElementById('singleresult').innerHTML = content.replace(regex, '<mark class="highlight">$&</mark>');
 
     // Scroll to matching query
+    let matches = {};
     try {
 
         query = query.toLowerCase();
@@ -178,23 +180,68 @@ function readAttr(div, data) {
         );
 
         // Find all matching strings
-        let matches = [];
+        matches = {};
         for (let i=0; i<xpathResult.snapshotLength; i++) {
-            matches.push(xpathResult.snapshotItem(i));
+            matches[i] = xpathResult.snapshotItem(i);
         };
-        console.log(matches, matches.length);
-        
-        // Scroll to result with offset
-        const rectPos = matches[0].getBoundingClientRect().top;
-        const offsetPos = rectPos - 200;
+        console.log('matches made');
 
-        window.scrollTo({ top: offsetPos, behavior: 'smooth' });
-    
+        // matches.forEach((item) => {
+        //     console.log(item.getBoundingClientRect().top);
+        // });
+        
+        // Scroll to first result with offset
+        // const rectPos = matches[0].getBoundingClientRect().top;
+        // const offsetPos = rectPos - 0;
+        // console.log(rectPos);
+        // window.scrollTo({ top: offsetPos, behavior: 'smooth' });
+
+        // Show reader controls
+        document.getElementById('readerControlReferenceTag').innerHTML = `${0} of ${Object.keys(matches).length} references`;
+        document.getElementById('readerControlsContainer').style.display = 'block';
+
     }
     catch (e) {
         console.error(e);
     };
+
+    // Reader control events
+    let counter = 0;
+    
+    document.getElementById('readerControlNext').addEventListener('click', () => {
+        
+        // Check counter, reset
+        if (counter === Object.keys(matches).length-1) {
+            counter = 0
+        }
+        else { counter+=1; };
+
+        // Scroll to rect
+        document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${Object.keys(matches).length} references`;
+        ScrollTo(matches[counter]);
+    });
+
+    document.getElementById('readerControlPrevious').addEventListener('click', () => {
+        
+        // Check counter, reset
+        if (counter === 0) {
+            counter = Object.keys(matches).length-1
+        }
+        else { counter-=1; };
+
+        // Scroll to rect
+        document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${Object.keys(matches).length} references`;
+        ScrollTo(matches[counter]);
+    });
 };
+
+// Configure reader controls
+function configReader() {
+
+
+
+};
+
 
 
 // Configure debounce
@@ -203,7 +250,6 @@ const debounce = (callback, time) => {
     window.clearTimeout(debounceTimer);
     debounceTimer = window.setTimeout(callback, time);
 };
-
 
 // Retro-active event search (on key press it searches)
 sb.addEventListener('keyup', async (event) => {
