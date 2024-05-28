@@ -22,7 +22,7 @@ async function fetchDefinitions() {
     let config = {
         method: "GET",
         headers: {
-            "X-API-Key": "632a99eecbdc40149684e6fe2fd8b3f4",
+            "X-API-Key": "e5cc8b67680f4a1b90ff76e1aac00036",
             "Content-Type": "application/json"
         },
         mode: 'cors'
@@ -92,7 +92,7 @@ let searchByText = async function(searchText) {
     let config = {
         method: "GET",
         headers: {
-            "X-API-Key": "632a99eecbdc40149684e6fe2fd8b3f4"
+            "X-API-Key": "e5cc8b67680f4a1b90ff76e1aac00036"
         }
     };
     
