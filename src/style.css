@@ -44,6 +44,7 @@ a:visited { color: #8c85b6; }
 
 #sbtitle {
     font-size: 20px;
+    user-select: none;
 }
 
 #sbar {
@@ -59,6 +60,12 @@ a:visited { color: #8c85b6; }
     font-weight: normal;
     color: #686484;
     width: 100%;
+}
+
+#sbarNote {
+    font-size: 10px;
+    font-weight: normal;
+    user-select: none;
 }
 
 #results {
@@ -77,10 +84,38 @@ a:visited { color: #8c85b6; }
 }
 
 #singlerescon {
+    display: none;
     font-size: 12px;
     margin: 0 auto;
     margin-top: 30px;
     margin-left: 30px;
     padding-right: 40px;
     text-align: left;
+}
+
+#readerControlsContainer {
+    display: none; /* flex */
+    gap: 5px;
+    align-items: center;
+    text-align: left;
+}
+
+#readerControlPrevious, #readerControlNext {
+    font-size: 12px;
+    cursor: pointer;
+}
+
+#readerControlSbar {
+    position: static;
+    border: #6D698D solid 1px;
+    border-radius: 8px;
+    background-color: #211D3D;
+    height: 32px;
+    text-align: left;
+    align-content: center;
+    padding-left: 10px;
+    font-size: 12px;
+    font-weight: normal;
+    color: #686484;
+    width: 20%;
 }
