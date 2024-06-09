@@ -8,7 +8,7 @@ export default function ScrollTo(DOMElement) {
 
         const rectPos = DOMElement.getBoundingClientRect().top;
         const offsetPos = rectPos - 400;
-        window.scrollTo({ top: offsetPos, behavior: 'instant' });
+        window.scrollTo({ top: offsetPos, behavior: 'smooth' });
     }
     catch (e) {
         console.error(e);

@@ -184,17 +184,6 @@ function readAttr(div, data) {
         for (let i=0; i<xpathResult.snapshotLength; i++) {
             matches[i] = xpathResult.snapshotItem(i);
         };
-        console.log('matches made');
-
-        // matches.forEach((item) => {
-        //     console.log(item.getBoundingClientRect().top);
-        // });
-        
-        // Scroll to first result with offset
-        // const rectPos = matches[0].getBoundingClientRect().top;
-        // const offsetPos = rectPos - 0;
-        // console.log(rectPos);
-        // window.scrollTo({ top: offsetPos, behavior: 'smooth' });
 
         // Show reader controls
         document.getElementById('readerControlReferenceTag').innerHTML = `${0} of ${Object.keys(matches).length} references`;
@@ -207,32 +196,81 @@ function readAttr(div, data) {
 
     // Reader control events
     let counter = 0;
-    
+    let matchLen = Object.keys(matches).length;
+
+
+    // Event for "Next" reader control
     document.getElementById('readerControlNext').addEventListener('click', () => {
-        
-        // Check counter, reset
-        if (counter === Object.keys(matches).length-1) {
-            counter = 0
-        }
-        else { counter+=1; };
 
-        // Scroll to rect
-        document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${Object.keys(matches).length} references`;
+        // Check for counter === length of matches array
+        if (counter + 1 === matchLen) {
+
+            // Scroll to the bounding space of the matching string and return
+            counter += 1;
+            document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
+            ScrollTo(matches[counter-1]);
+            return;
+        };
+
+        // Check if counter will surpass the length of the matches array, if so reset to 0
+        if (counter === matchLen) {
+            counter = 0;
+        }
+        else { counter += 1; }; // Increment the counter
+
+        // Scroll to the bounding space of the matching string
+        document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
         ScrollTo(matches[counter]);
     });
 
+    // Event for "Previous" reader control
     document.getElementById('readerControlPrevious').addEventListener('click', () => {
-        
-        // Check counter, reset
-        if (counter === 0) {
-            counter = Object.keys(matches).length-1
-        }
-        else { counter-=1; };
 
-        // Scroll to rect
-        document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${Object.keys(matches).length} references`;
+        // Check for counter === 0
+        if (counter === 0) {
+
+            // Scroll to the bounding space of the matching string and return
+            counter = matchLen;
+            console.log(counter, matchLen);
+            document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
+            ScrollTo(matches[counter-1]);
+            return;
+        };
+
+        // Scroll to the bounding space of the matching string
+        counter -= 1;
+        document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
         ScrollTo(matches[counter]);
     });
+
+
+    
+    // document.getElementById('readerControlNext').addEventListener('click', () => {
+        
+    //     // Check counter, reset
+    //     if (counter === Object.keys(matches).length - 1) {
+    //         counter = 0;
+    //     }
+    //     else { counter+=1; };
+    //     console.log(counter, Object.keys(matches).length);
+
+    //     // Scroll to rect
+    //     document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${Object.keys(matches).length} matches`;
+    //     ScrollTo(matches[counter]);
+    // });
+
+    // document.getElementById('readerControlPrevious').addEventListener('click', () => {
+        
+    //     // Check counter, reset
+    //     if (counter === 0) {
+    //         counter = Object.keys(matches).length - 1;
+    //     }
+    //     else { counter-=1; };
+
+    //     // Scroll to rect
+    //     document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${Object.keys(matches).length} matches`;
+    //     ScrollTo(matches[counter]);
+    // });
 };
 
 // Configure reader controls
