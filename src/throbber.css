@@ -1,9 +1,8 @@
 .spinner {
-    display: none; /* flex */
-    margin-top: 10px;
-    opacity: .5;
+    display: flex;
+    opacity: 0; /* 0.5 when turned on */
     pointer-events: none;
-    transition: opacity .25s
+    transition: opacity .25s;
 }
 
 .spinner,.spinner svg {
