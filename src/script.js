@@ -1,11 +1,10 @@
 import ScrollTo from './helpers/scrollTo';
 
+// Script config (random stuff)
 window.scrollTo(0, 0); // Lazy load-scroll fix
 let locale = navigator.language.split('-')[0];
 let sb = document.getElementById('sbar');
 
-
-// Fetch definitions
 
 // Fetch articles via searchText
 let searchByText = async function(searchText) {
