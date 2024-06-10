@@ -1,89 +1,11 @@
-import {get, set} from 'idb-keyval';
-import formatString from './helpers/formatString';
 import ScrollTo from './helpers/scrollTo';
 
 window.scrollTo(0, 0); // Lazy load-scroll fix
 let locale = navigator.language.split('-')[0];
 let sb = document.getElementById('sbar');
 
-// Store formatted and un-formatted list of weapons from definitions
-let formattedWeaponsList = []; // [Deprecate this]
-let weaponsList = []; // [Deprecate this]
 
 // Fetch definitions
-fetchDefinitions(); // [Deprecate this]
-
-
-
-// Fetch and format manifest/definitions
-async function fetchDefinitions() {
-
-    // Set config
-    let url = 'https://www.bungie.net/Platform/Destiny2/Manifest/';
-    let config = {
-        method: "GET",
-        headers: {
-            "X-API-Key": "e5cc8b67680f4a1b90ff76e1aac00036",
-            "Content-Type": "application/json"
-        },
-        mode: 'cors'
-    };
-
-    // Fetch manifest
-    let manifest = await fetch(url, config).then((data) => {
-        return data.json();
-    }).catch((error) => {
-        console.error(error);
-    });
-
-    let manifestVersion = manifest.Response.version;
-    let storedManifestVersion = window.localStorage.getItem('destinyManifestVersion');
-
-    // Check if stored manifest is out of date, or doesn't exist
-    if (manifestVersion !== storedManifestVersion) {
-
-        window.localStorage.setItem('destinyManifestVersion', manifest.Response.version);
-
-        // Fetch suffix URL
-        let suffix = manifest.Response.jsonWorldComponentContentPaths[locale].DestinyInventoryItemDefinition;
-        url = `https://www.bungie.net${suffix}`;
-    
-        // Fetch definitions
-        let defs = await fetch(url).then((data, config) => {
-            return data.json();
-        }).catch((error) => {
-            console.error(error);
-        });
-    
-        // Store definitions keyval pairs
-        set('DestinyInventoryItemDefinition', defs);
-    };
-
-    console.log('🐕‍🦺 Fetched Definitions');
-
-    // Make weapons list
-    makeList();
-};
-
-// Create list of all weapon names
-async function makeList() {
-
-    // Pull definitions
-    let definitionItems = await get('DestinyInventoryItemDefinition');
-
-    // Loop over items in definitions
-    for (let item of Object.values(definitionItems)) {
-        if (item.itemType === 3) {
-            
-            // Remove apostrophes and enforce titleCase
-            let itemName = item.displayProperties.name;
-            itemName = formatString(itemName);
-            formattedWeaponsList.push(itemName);
-
-            weaponsList.push(item.displayProperties.name); // un-formatted weapons list
-        };
-    };
-};
 
 // Fetch articles via searchText
 let searchByText = async function(searchText) {
@@ -124,7 +46,11 @@ let parseResponse = function(data) {
     let i = 0;
     let localStorageObj = {};
     window.localStorage.setItem('results', JSON.stringify({}));
+
+    // Change DOM content
     document.getElementById('results').innerHTML = ''; // Remove current DOM list
+    document.getElementById('results').style.display = 'block';
+    document.getElementById('searchBarContainer').classList = 'sbarContainer_active';
 
     // Map over array and create DOM elements for each
     Object.entries(resultsArr).forEach((item) => {
@@ -147,7 +73,7 @@ let parseResponse = function(data) {
 function readAttr(div, data) {
 
     // DOM content
-    document.getElementById('singlerescon').style.display = 'block';
+    document.getElementById('singleResultContainer').style.display = 'block';
     
     // Get stored results and selected-entry index
     let query = data.Response.query.searchText;
@@ -242,42 +168,6 @@ function readAttr(div, data) {
         document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
         ScrollTo(matches[counter]);
     });
-
-
-    
-    // document.getElementById('readerControlNext').addEventListener('click', () => {
-        
-    //     // Check counter, reset
-    //     if (counter === Object.keys(matches).length - 1) {
-    //         counter = 0;
-    //     }
-    //     else { counter+=1; };
-    //     console.log(counter, Object.keys(matches).length);
-
-    //     // Scroll to rect
-    //     document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${Object.keys(matches).length} matches`;
-    //     ScrollTo(matches[counter]);
-    // });
-
-    // document.getElementById('readerControlPrevious').addEventListener('click', () => {
-        
-    //     // Check counter, reset
-    //     if (counter === 0) {
-    //         counter = Object.keys(matches).length - 1;
-    //     }
-    //     else { counter-=1; };
-
-    //     // Scroll to rect
-    //     document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${Object.keys(matches).length} matches`;
-    //     ScrollTo(matches[counter]);
-    // });
-};
-
-// Configure reader controls
-function configReader() {
-
-
-
 };
 
 
@@ -294,7 +184,7 @@ sb.addEventListener('keyup', async (event) => {
 
     // Turn on throbber
     if (event.code !== 'Enter' && event.code !== 'ShiftLeft' && event.code !== 'ControlLeft' && event.code !== 'CapsLock' && event.code !== 'Space') {
-        document.getElementById('loadingSpinner').style.display = 'flex';
+        document.getElementById('loadingSpinner').style.opacity = '0.5';
     };
 
     // Localised function
@@ -309,7 +199,7 @@ sb.addEventListener('keyup', async (event) => {
                 };
             })
             .then(() => {
-                document.getElementById('loadingSpinner').style.display = 'none';
+                document.getElementById('loadingSpinner').style.opacity = '0';
             });
         };
     };

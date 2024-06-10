@@ -6,13 +6,13 @@
 }
 
 .spinner,.spinner svg {
-    height: 48px;
-    width: 48px
+    height: 36px;
+    width: 36px
 }
 
 .spinner.mini,.spinner.mini svg {
-    height: 24px;
-    width: 24px
+    height: 18px;
+    width: 18px
 }
 
 .spinner {

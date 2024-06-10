@@ -14,29 +14,36 @@ body {
 
 #head {
     display: flex;
-    gap: 10px;
-    color: #8c85b6;
+    justify-content: space-between;
     align-items: center;
-    text-align: center;
-    user-select: none;
-    margin-top: 10px;
-    margin-left: 5px;
+    padding-top: 20px;
+    padding-left: 20px;
+    padding-right: 20px;
 }
 
-a:visited { color: #8c85b6; }
-#head:nth-child(1) { cursor: pointer; } /* ignore pls */
+#headNav {
+    display: flex;
+    gap: 40px;
+}
 
-#ico {
-    width: 42px;
+#logoContainer {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+#logoContainer > div, #logoContainer > img {
     cursor: pointer;
 }
 
 #bnews {
-    margin-left: 70%;
     font-size: 13px;
-    cursor: pointer;
     text-decoration: none;
 }
+
+/* Remove text decoration on href visit ? */
+a:visited { color: #8c85b6; }
+#head:nth-child(1) { cursor: pointer; }
 
 #mid {
     margin: 0 auto;
@@ -50,24 +57,34 @@ a:visited { color: #8c85b6; }
     user-select: none;
 }
 
-#sbarContainer {
+.sbarContainer {
     display: flex;
-    border: 1px solid rgb(84, 118, 145);
-    width: 100%;
+    border: 1px solid #547691;
     margin: 0 auto;
     margin-top: 20px;
     border-radius: 5px;
     background-color: #211D3D;
 }
 
+.sbarContainer_active {
+    display: flex;
+    border: 1px solid #547691;
+    margin: 0 auto;
+    margin-top: 20px;
+    border-radius: 5px;
+    background-color: #211D3D;
+    border-bottom-left-radius: 0px;
+    border-bottom-right-radius: 0px;
+}
+
 #loadingSpinner {
     margin-top: 9px;
-    margin-left: 25px;
+    margin-right: 10px;
 }
 
 #sbar {
     border: none;
-    border-radius: 8px;
+    border-radius: 5px;
     background-color: #211D3D;
     height: 32px;
     text-align: left;
@@ -76,28 +93,40 @@ a:visited { color: #8c85b6; }
     font-size: 12px;
     font-weight: normal;
     color: #686484;
-    width: 85%;
+    width: 100%;
     margin-bottom: 0px;
     outline: none;
 }
 
-#sbarNote {
-    font-size: 10px;
-    font-weight: normal;
-    user-select: none;
-}
-
 #results {
-    margin-top: 10px;
+    display: none;
+    width: 100%;
     user-select: none;
 }
 
+/* every list result */
+#results > div {
+    text-align: left;
+    font-size: 14px;
+    padding: 5px;
+    border: 1px solid #547691;
+    border-top: none;
+}
+
+/* on hover for every list result */
 #results > div:hover {
-    color: white;
+    background-color: #322c57;
+    color: #bfbfbf;
     cursor: pointer;
 }
 
-#singlerescon {
+/* last result in the list */
+#results > div:last-child {
+    border-bottom-left-radius: 5px;
+    border-bottom-right-radius: 5px;
+}
+
+#singleResultContainer {
     display: none;
     font-size: 12px;
     margin: 0 auto;
