@@ -1,14 +1,16 @@
 import ScrollTo from './helpers/scrollTo';
+import getContent from './helpers/getContent';
 
 // Script config (random stuff)
-window.scrollTo(0, 0); // Lazy load-scroll fix
+window.scrollTo(0, 0); // Lazy load-scroll fix (doesn't work lol)
 let locale = navigator.language.split('-')[0];
 let sb = document.getElementById('sbar');
+document.getElementById('footerVersion').innerHTML = `${import.meta.env.version}`;
 
 
 // Fetch articles via searchText
-let searchByText = async function(searchText) {
-    console.log('input:',searchText);
+async function searchByText(searchText) {
+
     // Set config
     let url = `https://www.bungie.net/Platform/Content/Search/${locale}/?searchtext=${searchText}&ctype=help news`;
     let config = {
@@ -29,8 +31,9 @@ let searchByText = async function(searchText) {
     };
 };
 
+
 // Use response
-let parseResponse = function(data) {
+function parseResponse(data) {
 
     // Localised vars
     const response = data.Response.results;
@@ -59,7 +62,7 @@ let parseResponse = function(data) {
         localStorageObj[i] = item[1];
         div.innerHTML = item[0];
         div.setAttribute('data-index', i);
-        div.addEventListener('click', () => {readAttr(div, data)});
+        div.addEventListener('click', () => {renderArticle(div, data)});
         document.getElementById('results').appendChild(div);
         i++;
     });
@@ -68,28 +71,114 @@ let parseResponse = function(data) {
     window.localStorage.setItem('results', JSON.stringify(localStorageObj));
 };
 
+
 // Read attribute from element onclick
-function readAttr(div, data) {
+async function renderArticle(div, data) {
 
     // DOM content
+    document.getElementById('footer').style.display = 'none';
     document.getElementById('singleResultContainer').style.display = 'block';
     
     // Get stored results and selected-entry index
     let query = data.Response.query.searchText;
     let storedResults = JSON.parse(window.localStorage.getItem('results'));
     let index = div.getAttribute('data-index');
-    console.log('return search:',data.Response.query.searchText);
 
-    // Highlight search term in content
+    // Highlight occurrences of search term in text
     let regex = new RegExp(query, 'gi');
     let content = storedResults[index].replace(/(<mark class="highlight">|<\/mark>)/gim, '');
 
-    // Change DOM content
-    document.getElementById('mid').style.display = 'none';
-    document.getElementById('titleresult').innerHTML = `Viewing: ${div.innerHTML}`;
-    document.getElementById('singleresult').innerHTML = content.replace(regex, '<mark class="highlight">$&</mark>');
+    // Find missing content and replace contentById endpoint response
+    let missingContentRegex = /\[\[([^\[\]]+)\]\]/g;
+    let missingContentMatches = content.match(missingContentRegex);
+    let missingContentUniqueMatches = new Set();
 
-    // Scroll to matching query
+    // If missing content exists in text
+    if (missingContentMatches) {
+        missingContentMatches.forEach((match) => {
+            missingContentUniqueMatches.add(match);
+        });
+    };
+
+    let missingContentArray = Array.from(missingContentUniqueMatches);
+    let missingContentObject = {};
+    
+    // Wrap in promise
+    let promise = new Promise(async (resolve, reject) => {
+
+        // Wrap in try catch for error handling
+        try {
+
+            // Loop over missing content array
+            for (const item of missingContentArray) {
+            
+                // Get content id and request path of missing content, form new URL for image
+                const contentId = item.split("'")[1];
+                let newElement = '';
+                
+                await getContent(contentId, locale)
+                .then(data => {
+                    return data.json();
+                })
+                .then(value => {
+
+                    console.log(value)
+
+                    // Check if path is image > make image element, otherwise make youtube embed ?
+                    let path = value.Response.properties.Path;
+
+                    if (path.includes('youtube')) {
+
+                        // Find youtube video id
+                        let id = path.split('=')[1].substring(0, 11);
+                        newElement = `<iframe src="https://youtube.com/embed/${id}"></iframe>`
+                    }
+                    else {
+                        newElement = `<img class="articleImage" src="https://bungie.net${value.Response.properties.Path}"/>`;
+                    };
+                });
+    
+                // Form new object with all ids and content to replace with
+                missingContentObject[contentId] = {
+                    match: item,
+                    replaceWith: newElement
+                };
+            };
+
+            // Loop over missing content object that was returned from above, replace in raw text
+            for (let item of Object.values(missingContentObject)) {
+                content = content.replace(`${item.match}`, `${item.replaceWith}`);
+            };
+    
+            resolve();
+
+        } catch (error) { reject(error); };
+    });
+
+    // Wait for promise to finish, then re-render text content
+    promise.then(() => {
+
+        console.log('Content fetched');
+
+        // Re-render text
+        document.getElementById('mid').style.display = 'none';
+        document.getElementById('titleresult').innerHTML = `${div.innerHTML}`;
+        document.getElementById('singleresult').innerHTML = content.replace(regex, '<mark class="highlight">$&</mark>');
+
+        renderReaderControls(query); // Enable reader controls
+    });
+
+    // Show stuff on the screen (temporarily before the promise resolves which will replace this text)
+    document.getElementById('mid').style.display = 'none';
+    document.getElementById('titleresult').innerHTML = `${div.innerHTML}`;
+    document.getElementById('singleresult').innerHTML = content.replace(regex, '<mark class="highlight">$&</mark>');
+};
+
+
+// Configure and render DOM elements for reader controls
+function renderReaderControls(query) {
+
+    // Find matches of search term in content
     let matches = {};
     try {
 
@@ -133,7 +222,8 @@ function readAttr(div, data) {
             // Scroll to the bounding space of the matching string and return
             counter += 1;
             document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
-            ScrollTo(matches[counter-1]);
+            ScrollTo(matches[counter-1], counter, matchLen);
+            // console.log(counter, matchLen);
             return;
         };
 
@@ -145,7 +235,8 @@ function readAttr(div, data) {
 
         // Scroll to the bounding space of the matching string
         document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
-        ScrollTo(matches[counter]);
+        ScrollTo(matches[counter], counter, matchLen);
+        // console.log(counter, matchLen);
     });
 
     // Event for "Previous" reader control
@@ -167,13 +258,12 @@ function readAttr(div, data) {
         document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
         ScrollTo(matches[counter]);
     });
-};
+}
 
 
-
-// Configure debounce
+// Debounce function
 let debounceTimer;
-const debounce = (callback, time) => {
+function debounce (callback, time) {
     window.clearTimeout(debounceTimer);
     debounceTimer = window.setTimeout(callback, time);
 };
@@ -186,7 +276,7 @@ sb.addEventListener('keyup', async (event) => {
         document.getElementById('loadingSpinner').style.opacity = '0.5';
     };
 
-    // Localised function
+    // Localised search function
     async function search() {
 
         // Exclude modifier keys from event

@@ -1,3 +1,5 @@
+let package = require('./package.json');
+
 // // Snowpack config
 /** @type {import("snowpack").SnowpackUserConfig } */
 module.exports = {
@@ -15,14 +17,12 @@ module.exports = {
   routes: [
     {
       match: 'routes',
-      src: '/home',
-      dest: '/index.html',
-    },
-    {
-      match: 'routes',
       src: '.*',
       dest: '/index.html',
     }
   ],
+  env: {
+    version: `${package.version}`
+  },
   plugins: ['@snowpack/plugin-postcss']
 };

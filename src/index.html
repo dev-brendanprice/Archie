@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./style.css">
     <link rel="stylesheet" href="./throbber.css">
+    <link rel="stylesheet" href="./scroll.css">
+    <link rel="stylesheet" href="./viewports.css">
     <link rel="icon" type="image/x-icon" href="./media/favicon.ico">
     <title>Archie</title>
 </head>
@@ -12,13 +14,13 @@
 
     <div>
         <div id="head">
-            <div id="logoContainer">
-                <img src="./media/archie.png" style="width: 36px;" onclick="window.location.reload();">
-                <div onclick="window.location.reload();">Archie</div>
+            <div id="logoContainer" onclick="window.location.reload();">
+                <img src="./media/archie.png" style="width: 32px;">
+                <div>Archie</div>
             </div>
             <div id="headNav">
-                <a href="https://www.bungie.net/7/en/News" target="_blank" id="bnews">Bungie News</a>
-                <!-- <a href="https://www.bungie.net/7/en/News" target="_blank" id="bnews">Surprise Me!</a> -->
+                <!-- <a id="surpriseMeButton" class="navButtonControl">Surprise Me!</a> -->
+                <a href="https://www.bungie.net/7/en/News" target="_blank" class="navButtonControl">Bungie News</a>
             </div>
         </div>
 
@@ -29,7 +31,7 @@
             <div style="width: 100%;">
                 <div class="sbarContainer" id="searchBarContainer">
 
-                    <input type="text" id="sbar" placeholder="Sunshot" autocomplete="false">
+                    <input type="text" id="sbar" placeholder="Sunshot">
                     <div class="spinner mini" id="loadingSpinner">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 62.08 71.68">
                             <g>
@@ -53,20 +55,33 @@
                 </div>
                 <div id="results"></div>
             </div>
-        
         </div>
 
         <div id="readerControlsContainer">
             <div id="readerControlsReferenceCon">
                 <div id="readerControlReferenceTag">$references</div>
-                <div id="readerControlPrevious">prev</div>
-                <div id="readerControlNext">next</div>
+                <div id="readerControlsCon">
+                    <div id="readerControlPrevious">prev</div>
+                    <div id="readerControlNext">next</div>
+                </div>
+            </div>
+            <div id="readerControlsSearchBarCon">
+                <input type="text" id="readerControlsSearchBar" placeholder="search new">
             </div>
         </div>
 
         <div id="singleResultContainer">
             <div id="titleresult"></div>
             <div id="singleresult"></div>
+        </div>
+
+        <div id="footer">
+            <a id="footerVersion" href="https://github.com/dev-brendanprice/Archie" target="_blank">0.0.0</a>
+            <div id="footerCreator">
+                <div>Made by</div>
+                <a href="https://x.com/_brendanprice" target="_blank">Brendan</a>
+                <div><3</div>
+            </div>
         </div>
     </div>
 

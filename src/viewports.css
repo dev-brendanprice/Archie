@@ -1,0 +1,7 @@
+@media screen and (max-width: 1250px) {
+    #singleResultContainer {
+        width: fit-content;
+        padding-left: 64px;
+        padding-right: 64px;
+    }
+}
