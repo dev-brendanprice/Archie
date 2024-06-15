@@ -7,6 +7,12 @@ let locale = navigator.language.split('-')[0];
 let sb = document.getElementById('sbar');
 document.getElementById('footerVersion').innerHTML = `${import.meta.env.version}`;
 
+// Global DOMElement variables because why not
+const singleResultContainer = document.getElementById('singleResultContainer');
+const searchBarElement = document.getElementById('searchBarContainer');
+const resultsElement = document.getElementById('results');
+const footerElement = document.getElementById('footer');
+
 
 // Fetch articles via searchText
 async function searchByText(searchText) {
@@ -32,121 +38,101 @@ async function searchByText(searchText) {
 };
 
 
-// Use response
+// Save and process the response
 function parseResponse(data) {
 
-    // Localised vars
-    const response = data.Response.results;
-    const resultsArr = {};
-
-    // Create array of results
-    for (let result of response) {
-        resultsArr[result.properties.Title] = result.properties.Content;
-    };
-
-    // Counter, init & LocalStorage
-    let i = 0;
-    let localStorageObj = {};
-    window.localStorage.setItem('results', JSON.stringify({}));
+    // Make array of results
+    const resultsArray = data.Response.results.map(v => v);
 
     // Change DOM content
-    document.getElementById('results').innerHTML = ''; // Remove current DOM list
-    document.getElementById('results').style.display = 'block';
-    document.getElementById('searchBarContainer').classList = 'sbarContainer_active';
+    resultsElement.innerHTML = '';
+    resultsElement.style.display = 'block';
+    searchBarElement.classList = 'sbarContainer_active';
 
-    // Map over array and create DOM elements for each
-    Object.entries(resultsArr).forEach((item) => {
+    // Loop over array of results and append results to list
+    let index = 0;
+    for (let result of resultsArray) {
         
-        // Create new div with attr, add to DOM & LocalStorage
-        const div = document.createElement('div');
-        localStorageObj[i] = item[1];
-        div.innerHTML = item[0];
-        div.setAttribute('data-index', i);
-        div.addEventListener('click', () => {renderArticle(div, data)});
-        document.getElementById('results').appendChild(div);
-        i++;
-    });
+        const newElement = document.createElement('div');
+        newElement.innerHTML = result.properties.Title;
+        newElement.setAttribute('data-index', index);
 
-    // Add results to LocalStorage
-    window.localStorage.setItem('results', JSON.stringify(localStorageObj));
+        result = ammendResult(data, result);
+        console.log(result)
+        newElement.addEventListener('click', () => renderArticle(newElement, result));
+        resultsElement.appendChild(newElement);
+        index++;
+    };
+
+    // ammend content, ease of use
+    function ammendResult(data, result) {
+
+        const dateOptions = {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        };
+
+        result.creationDate = new Date(result.creationDate).toLocaleDateString(locale, dateOptions);
+        result.modifyDate = new Date(result.modifyDate).toLocaleDateString(locale, dateOptions);
+
+        result.query = data.Response.query;
+        return result;
+    };
 };
 
 
 // Read attribute from element onclick
-async function renderArticle(div, data) {
+async function renderArticle(element, result) {
 
-    // DOM content
-    document.getElementById('footer').style.display = 'none';
-    document.getElementById('singleResultContainer').style.display = 'block';
-    
-    // Get stored results and selected-entry index
-    let query = data.Response.query.searchText;
-    let storedResults = JSON.parse(window.localStorage.getItem('results'));
-    let index = div.getAttribute('data-index');
+    // change DOM content
+    footerElement.style.display = 'none';
+    singleResultContainer.style.display = 'block';
 
-    // Highlight occurrences of search term in text
-    let regex = new RegExp(query, 'gi');
-    let content = storedResults[index].replace(/(<mark class="highlight">|<\/mark>)/gim, '');
+    // regex to highlight search query
+    const searchQuery = result.query.searchText;
+    const regex_highlight = new RegExp(searchQuery, 'gi');
+    let content = result.properties.Content.replace(/(<mark class="highlight">|<\/mark>)/gim, '')
 
-    // Find missing content and replace contentById endpoint response
-    let missingContentRegex = /\[\[([^\[\]]+)\]\]/g;
-    let missingContentMatches = content.match(missingContentRegex);
-    let missingContentUniqueMatches = new Set();
+    // missing content
+    const regex_missingContent = /\[\[([^\[\]]+)\]\]/g;
+    const matches = content.match(regex_missingContent);
+    const uniqueMatches = [];
 
-    // If missing content exists in text
-    if (missingContentMatches) {
-        missingContentMatches.forEach((match) => {
-            missingContentUniqueMatches.add(match);
-        });
-    };
-
-    let missingContentArray = Array.from(missingContentUniqueMatches);
-    let missingContentObject = {};
+    // check if text actually contains missing content
+    if (matches) matches.forEach(item => uniqueMatches.push(item));
+    let missingContent = {};
     
     // Wrap in promise
     let promise = new Promise(async (resolve, reject) => {
 
-        // Wrap in try catch for error handling
+        // error handle, loop over array of missing content
         try {
-
-            // Loop over missing content array
-            for (const item of missingContentArray) {
+            for (const item of matches) {
             
                 // Get content id and request path of missing content, form new URL for image
                 const contentId = item.split("'")[1];
                 let newElement = '';
                 
-                await getContent(contentId, locale)
-                .then(data => {
-                    return data.json();
-                })
+                await getContent(contentId, locale).then(data => {return data.json()})
                 .then(value => {
 
-                    console.log(value)
-
-                    // Check if path is image > make image element, otherwise make youtube embed ?
+                    // check if URL is not image
                     let path = value.Response.properties.Path;
-
                     if (path.includes('youtube')) {
-
-                        // Find youtube video id
-                        let id = path.split('=')[1].substring(0, 11);
-                        newElement = `<iframe src="https://youtube.com/embed/${id}"></iframe>`
-                    }
-                    else {
-                        newElement = `<img class="articleImage" src="https://bungie.net${value.Response.properties.Path}"/>`;
+                        newElement = `<iframe src="https://youtube.com/embed/${path.split('=')[1].substring(0, 11)}"></iframe>`;
+                        return;
                     };
+
+                    newElement = `<img class="articleImage" src="https://bungie.net${path}"/>`;
                 });
     
                 // Form new object with all ids and content to replace with
-                missingContentObject[contentId] = {
-                    match: item,
-                    replaceWith: newElement
-                };
+                missingContent[contentId] = { match: item, replaceWith: newElement };
             };
 
             // Loop over missing content object that was returned from above, replace in raw text
-            for (let item of Object.values(missingContentObject)) {
+            for (let item of Object.values(missingContent)) {
                 content = content.replace(`${item.match}`, `${item.replaceWith}`);
             };
     
@@ -162,16 +148,16 @@ async function renderArticle(div, data) {
 
         // Re-render text
         document.getElementById('mid').style.display = 'none';
-        document.getElementById('titleresult').innerHTML = `${div.innerHTML}`;
-        document.getElementById('singleresult').innerHTML = content.replace(regex, '<mark class="highlight">$&</mark>');
+        document.getElementById('titleresult').innerHTML = `${element.innerHTML}`;
+        document.getElementById('singleresult').innerHTML = content.replace(regex_highlight, '<mark class="highlight">$&</mark>');
 
-        renderReaderControls(query); // Enable reader controls
+        renderReaderControls(searchQuery); // Enable reader controls
     });
 
-    // Show stuff on the screen (temporarily before the promise resolves which will replace this text)
+    // Render text, gets replaced by above promise call
     document.getElementById('mid').style.display = 'none';
-    document.getElementById('titleresult').innerHTML = `${div.innerHTML}`;
-    document.getElementById('singleresult').innerHTML = content.replace(regex, '<mark class="highlight">$&</mark>');
+    document.getElementById('titleresult').innerHTML = `${element.innerHTML}`;
+    document.getElementById('singleresult').innerHTML = content.replace(regex_highlight, '<mark class="highlight">$&</mark>');
 };
 
 
@@ -258,7 +244,7 @@ function renderReaderControls(query) {
         document.getElementById('readerControlReferenceTag').innerHTML = `${counter} of ${matchLen} matches`;
         ScrollTo(matches[counter]);
     });
-}
+};
 
 
 // Debounce function
@@ -269,30 +255,29 @@ function debounce (callback, time) {
 };
 
 // Retro-active event search (on key press it searches)
-sb.addEventListener('keyup', async (event) => {
+sb.addEventListener('keyup', (event) => {
 
-    // Turn on throbber
-    if (event.code !== 'Enter' && event.code !== 'ShiftLeft' && event.code !== 'ControlLeft' && event.code !== 'CapsLock' && event.code !== 'Space') {
+    const keyupSanitized = event.code !== 'Enter' && event.code !== 'ShiftLeft' && event.code !== 'ControlLeft' && event.code !== 'CapsLock' && event.code !== 'Space' && event.code !== 'Backspace';
+
+    // check for correct keyup, execute
+    if (keyupSanitized) {
+
+        // throbber
         document.getElementById('loadingSpinner').style.opacity = '0.5';
-    };
+        
+        // wrap search function in debounce
+        debounce(async () => {
+            searchByText(sb.value).then(data => {
 
-    // Localised search function
-    async function search() {
-
-        // Exclude modifier keys from event
-        if (event.code !== 'Enter' && event.code !== 'ShiftLeft' && event.code !== 'ControlLeft' && event.code !== 'CapsLock' && event.code !== 'Space') {
-            await searchByText(sb.value).then((data) => { // Fetch URL
-
-                if (data) { // Ignore falsy return
+                let results = data.Response.results;
+                if (results.length) {
+                    document.getElementById('noResultsFoundText').style.display = 'none';
                     parseResponse(data);
+                    return;
                 };
-            })
-            .then(() => {
-                document.getElementById('loadingSpinner').style.opacity = '0';
-            });
-        };
+    
+                document.getElementById('noResultsFoundText').style.display = 'block';
+            }).then(() => document.getElementById('loadingSpinner').style.opacity = '0');
+        }, 500);
     };
-
-    // Use search as a callback on debounce function
-    debounce(search, 500);
 });

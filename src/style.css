@@ -140,6 +140,15 @@ body {
     width: 50%;
 }
 
+#noResultsFoundText {
+    display: none;
+    margin-top: 5px;
+    font-size: 12px;
+    font-weight: normal;
+    font-style: italic;
+    text-align: left;
+}
+
 #titleresult {
     font-size: 26px;
     margin-bottom: 20px;
