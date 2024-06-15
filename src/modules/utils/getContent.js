@@ -1,3 +1,5 @@
+import {clientLocale} from '../config';
+
 // Fetch content via contentId from bnet api
 export default async function getContentById(contentId, locale) {
     
@@ -5,7 +7,7 @@ export default async function getContentById(contentId, locale) {
     try {
 
         // request config
-        let url = `https://www.bungie.net/Platform/Content/GetContentById/${contentId}/${locale}/`;
+        let url = `https://www.bungie.net/Platform/Content/GetContentById/${contentId}/${clientLocale}/`;
         let config = {
             method: "GET",
             headers: {

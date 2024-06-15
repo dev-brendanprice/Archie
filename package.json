@@ -1,8 +1,8 @@
 {
   "name": "archie",
-  "version": "0.5.3",
+  "version": "0.6.0",
   "description": "",
-  "main": "index.js",
+  "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "npx snowpack dev",
@@ -19,6 +19,7 @@
   "dependencies": {
     "@csstools/postcss-sass": "^5.1.1",
     "@snowpack/plugin-postcss": "^1.4.3",
+    "dotenv": "^16.4.5",
     "idb-keyval": "^6.2.1",
     "postcss-cli": "^11.0.0",
     "postcss-scss": "^4.0.9",
