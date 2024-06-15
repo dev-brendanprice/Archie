@@ -1,4 +1,4 @@
-import {clientLocale} from '../config';
+import {clientLocale,bnetApiKey} from './config';
 
 // Fetch content via contentId from bnet api
 export default async function getContentById(contentId, locale) {
@@ -11,7 +11,7 @@ export default async function getContentById(contentId, locale) {
         let config = {
             method: "GET",
             headers: {
-                "X-API-Key": "632a99eecbdc40149684e6fe2fd8b3f4"
+                "X-API-Key": bnetApiKey
             }
         };
 
