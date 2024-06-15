@@ -1,4 +1,4 @@
-import {clientLocale,bnetApiKey} from './config';
+import {clientLocale,bnetApiKey} from '../config';
 
 // Fetch content via contentId from bnet api
 export default async function getContentById(contentId, locale) {
